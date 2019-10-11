@@ -1,7 +1,4 @@
 #version 330 core
-//layout (location = 10) in vec3 aPos;
-//layout (location = 11) in vec3 aColor;
-//layout (location = 12) in vec2 aTexCoord;
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 

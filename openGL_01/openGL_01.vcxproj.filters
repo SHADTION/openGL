@@ -37,10 +37,22 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.frag">
+    <None Include="Object.frag">
       <Filter>源文件</Filter>
     </None>
-    <None Include="shader.vert">
+    <None Include="Object.vert">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="Colors.vert">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="Colors.frag">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="Lights.vert">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="Lights.frag">
       <Filter>源文件</Filter>
     </None>
   </ItemGroup>

@@ -199,27 +199,37 @@ int main(void)
 
 	#pragma region Init Shader Program
 		// 新建一个Shader类，初始化并链接shader
-			Shader ourShader("shader.vert", "shader.frag");
+			Shader objectShader("Object.vert", "Object.frag");
+			Shader colorShader("Colors.vert", "Colors.frag");
+			Shader lightShader("Lights.vert", "Lights.frag");
 	#pragma endregion
 
 
 	#pragma region Init and Load Models to VAO & VBO
-		// vertex array objeects
-		unsigned int VAO;
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
-
 		// vertex buffer objects
 		unsigned int VBO;
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		
+		// vertex array objeects
+		unsigned int awesomeVAO;
+		glGenVertexArrays(1, &awesomeVAO);
+		glBindVertexArray(awesomeVAO);
 
 		// 设置顶点属性指针
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
+
+		// light vertex array objeects
+		unsigned int lightVAO;
+		glGenVertexArrays(1, &lightVAO);
+		glBindVertexArray(lightVAO);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
 	#pragma endregion
 	
 
@@ -229,10 +239,10 @@ int main(void)
 		texture[0] = loadImageToGUP("container.jpg", GL_RGB, GL_RGB);
 		texture[1] = loadImageToGUP("awesomeface.png", GL_RGBA, GL_RGBA);
 		
-		// 通过使用glUniform1i设置每个采样器的方式告诉OpenGL每个着色器采样器属于哪个纹理单元
-		ourShader.use();													//先使用shader才能改变uniform的值
-		glUniform1i(glGetUniformLocation(ourShader.ID, "texture0"), 0);		// 手动设置
-		ourShader.setInt("texture1", 1);									// 或者使用着色器类设置
+		//// 通过使用glUniform1i设置每个采样器的方式告诉OpenGL每个着色器采样器属于哪个纹理单元
+		//objectShader.use();													//先使用shader才能改变uniform的值
+		//glUniform1i(glGetUniformLocation(objectShader.ID, "texture0"), 0);		// 手动设置
+		//objectShader.setInt("texture1", 1);									// 或者使用着色器类设置
 	#pragma endregion
 
 
@@ -253,43 +263,91 @@ int main(void)
 		ourCamera->processInput(window_1);
 		
 		// Clear Screen
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0, 0, 0, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//清除颜色缓冲，通过在glClear函数中指定DEPTH_BUFFER_BIT位来清除深度缓冲
 
+		#pragma region texture object
+				// Set Model matrix
+				model = glm::mat4(1.0f);
+				float angle = (float)glfwGetTime() * 20.0f;
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+				// Set View and Projection Matrices here if you want.
+				view = ourCamera->GetFrontViewMatrix();
 		
-		view = ourCamera->GetFrontViewMatrix();
+		
+				// Set Material -> Shader Program
+				objectShader.use();										//先使用shader才能改变uniform的值
+				// Set Material -> Textures
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, texture[0]);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, texture[1]);
+				// Set Material -> Uniforms
+				glUniform1i(glGetUniformLocation(objectShader.ID, "texture0"), 0);
+				glUniform1i(glGetUniformLocation(objectShader.ID, "texture2"), 2);
+				glUniformMatrix4fv(glGetUniformLocation(objectShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(glGetUniformLocation(objectShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(objectShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		
+				// Set Model
+				glBindVertexArray(awesomeVAO);
+		
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+		#pragma endregion
 
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			// Set Model matrix
-			model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-			float angle = 20.0f * i; 
-			if ((i QE 0) || ((i + 1) % 3 QE 0))
-				angle = (float)glfwGetTime() * 20.0f;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		#pragma region color object
+				// Set Model matrix
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, cubePositions[2]);
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-			// Set View and Projection Matrices here if you want.
-			//
+				// Set View and Projection Matrices here if you want.
+				//
 
-			// Set Material -> Shader Program
-			ourShader.use();										//先使用shader才能改变uniform的值
-			// Set Material -> Textures
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture[0]);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, texture[1]);
-			// Set Material -> Uniforms
-			glUniform1i(glGetUniformLocation(ourShader.ID, "texture0"), 0);
-			glUniform1i(glGetUniformLocation(ourShader.ID, "texture2"), 2);
-			glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-			
-			// Set Model
-			glBindVertexArray(VAO);
+				// Set Material -> Shader Program
+				colorShader.use();										//先使用shader才能改变uniform的值
+				// Set Material -> Textures
+				//
+				// Set Material -> Uniforms
+				glUniform3f(glGetUniformLocation(colorShader.ID, "objectColor"), 1.0f, 0.5f, 0.31f);
+				glUniform3f(glGetUniformLocation(colorShader.ID, "lightColor"),1.0f, 1.0f, 1.0f);
+				glUniformMatrix4fv(glGetUniformLocation(colorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(glGetUniformLocation(colorShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(colorShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+				// Set Model
+				glBindVertexArray(lightVAO);
+
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+		#pragma endregion
+
+		#pragma region light object
+				// Set Model matrix
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, cubePositions[3]);
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+				// Set View and Projection Matrices here if you want.
+				//
+
+				// Set Material -> Shader Program
+				lightShader.use();										//先使用shader才能改变uniform的值
+				// Set Material -> Textures
+				//
+				// Set Material -> Uniforms
+				glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+				// Set Model
+				glBindVertexArray(lightVAO);
+
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+		#pragma endregion
+
+		
+		//glBindVertexArray(lightVAO);
 		glBindVertexArray(0);
 
 		//监测事件，交换缓冲
@@ -300,12 +358,6 @@ int main(void)
 	glfwTerminate();
 	return 0;              
 }
-
-
-
-
-
-
 
 
 
