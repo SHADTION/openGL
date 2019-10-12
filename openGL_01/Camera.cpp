@@ -57,15 +57,19 @@ void Camera::processInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, true);
 	float cameraSpeed = 2.5f * deltaTime;	//现在我们有了deltaTime，在计算速度的时候可以将其考虑进去了：
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		//cameraPos += cameraSpeed * cameraFront;		//该方法移动方向为视角方向
-		cameraPos += cameraSpeed * glm::normalize(glm::cross(worldUp, glm::cross(cameraFront, worldUp)));		//该方法移动方向为FPS方向
+		cameraPos += cameraSpeed * cameraFront;		//该方法移动方向为视角方向
+		//cameraPos += cameraSpeed * glm::normalize(glm::cross(worldUp, glm::cross(cameraFront, worldUp)));		//该方法移动方向为FPS方向
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		//cameraPos -= cameraSpeed * cameraFront;
-		cameraPos -= cameraSpeed * glm::normalize(glm::cross(worldUp, glm::cross(cameraFront, worldUp)));
+		cameraPos -= cameraSpeed * cameraFront;
+		//cameraPos -= cameraSpeed * glm::normalize(glm::cross(worldUp, glm::cross(cameraFront, worldUp)));
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		cameraPos -= glm::normalize(glm::cross(cameraFront, worldUp)) * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cameraPos += glm::normalize(glm::cross(cameraFront, worldUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		cameraPos += worldUp * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+		cameraPos -= worldUp * cameraSpeed;
 }
 
 void Camera::mouse_callback(float XPos, float YPos) {
