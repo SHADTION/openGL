@@ -1,5 +1,6 @@
 ﻿#include "Shader.h"
 #include "Camera.h"
+#include "Material.h"
 
 
 #include <GLFW\glfw3.h>
@@ -197,10 +198,22 @@ int main(void)
 
 
 	#pragma region Init Shader Program
-		// 新建一个Shader类，初始化并链接shader
-			Shader objectShader("Object.vert", "Object.frag");
-			Shader colorShader("Colors.vert", "Colors.frag");
-			Shader lightShader("Lights.vert", "Lights.frag");
+		// 新建Shader类，初始化并链接shader
+			//Shader objectShader("Object.vert", "Object.frag");
+			//Shader colorShader("Colors.vert", "Colors.frag");
+			//Shader lightShader("Lights.vert", "Lights.frag");
+			Shader* objectShader = new Shader("Object.vert", "Object.frag");
+			Shader* colorShader = new Shader("Colors.vert", "Colors.frag");
+			Shader* lightShader = new Shader("Lights.vert", "Lights.frag");
+	#pragma endregion
+
+
+	#pragma region Init Material
+			Material* ourMaterial = new Material(colorShader, 
+				glm::vec3(1.0f, 1.0f, 1.0f),	//ambient
+				glm::vec3(1.0f, 1.0f, 1.0f),	//diffuse
+				glm::vec3(1.0f, 1.0f, 1.0f),	//specular
+				32.0f);							//shininess
 	#pragma endregion
 
 
@@ -277,18 +290,18 @@ int main(void)
 		
 		
 				// Set Material -> Shader Program
-				objectShader.use();										//先使用shader才能改变uniform的值
+				objectShader->use();										//先使用shader才能改变uniform的值
 				// Set Material -> Textures
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture[0]);
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, texture[1]);
 				// Set Material -> Uniforms
-				glUniform1i(glGetUniformLocation(objectShader.ID, "texture0"), 0);
-				glUniform1i(glGetUniformLocation(objectShader.ID, "texture2"), 2);
-				glUniformMatrix4fv(glGetUniformLocation(objectShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-				glUniformMatrix4fv(glGetUniformLocation(objectShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(objectShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniform1i(glGetUniformLocation(objectShader->ID, "texture0"), 0);
+				glUniform1i(glGetUniformLocation(objectShader->ID, "texture2"), 2);
+				glUniformMatrix4fv(glGetUniformLocation(objectShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(glGetUniformLocation(objectShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(objectShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		
 				// Set Model
 				glBindVertexArray(awesomeVAO);
@@ -306,14 +319,14 @@ int main(void)
 				//
 
 				// Set Material -> Shader Program
-				lightShader.use();										//先使用shader才能改变uniform的值
+				lightShader->use();										//先使用shader才能改变uniform的值
 				// Set Material -> Textures
 				//
 				// Set Material -> Uniforms
-				glUniform3f(glGetUniformLocation(lightShader.ID, "lightColor"), 1.0f, 1.0f, 1.0f);
-				glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-				glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				glUniform3f(glGetUniformLocation(lightShader->ID, "lightColor"), 1.0f, 1.0f, 1.0f);
+				glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 				// Set Model
 				glBindVertexArray(lightVAO);
@@ -325,7 +338,6 @@ int main(void)
 				// Set Model matrix
 				model = glm::mat4(1.0f);
 				model = glm::translate(model, cubePositions[2]);
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 				// Set View and Projection Matrices here if you want.
 				//
 
@@ -333,19 +345,23 @@ int main(void)
 				glm::mat3 normalChange = glm::mat3(transpose(inverse(model)));
 
 				// Set Material -> Shader Program
-				colorShader.use();										//先使用shader才能改变uniform的值
+				colorShader->use();										//先使用shader才能改变uniform的值
 				// Set Material -> Textures
 				//
 				// Set Material -> Uniforms
-				glUniform3f(glGetUniformLocation(colorShader.ID, "objectColor"), 1.0f, 0.5f, 0.31f);
-				colorShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+				glUniform3f(glGetUniformLocation(colorShader->ID, "objectColor"), 1.0f, 0.5f, 0.31f);
+				colorShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 				//glUniform3fv(glGetUniformLocation(colorShader.ID, "lightColor"), 1, &glm::vec3(1.0f, 1.0f, 1.0f)[1]);
-				colorShader.setVec3("lightPos", cubePositions[3]);
-				colorShader.setMat3("normalChange", normalChange);
-				colorShader.setVec3("viewPos", ourCamera->cameraPos);
-				glUniformMatrix4fv(glGetUniformLocation(colorShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-				glUniformMatrix4fv(glGetUniformLocation(colorShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(colorShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				colorShader->setVec3("lightPos", cubePositions[3]);
+				colorShader->setMat3("normalChange", normalChange);
+				colorShader->setVec3("viewPos", ourCamera->cameraPos);
+				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				ourMaterial->shader->setVec3("material.ambient", ourMaterial->ambient);
+				ourMaterial->shader->setVec3("material.diffuse", ourMaterial->diffuse); 
+				ourMaterial->shader->setVec3("material.specular", ourMaterial->specular);
+				ourMaterial->shader->setFloat("material.shininess", ourMaterial->shininess);
 
 				// Set Model
 				glBindVertexArray(lightVAO);
