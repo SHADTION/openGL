@@ -1,4 +1,7 @@
-﻿  Material.cpp
+﻿  Camera.cpp
+  Material.cpp
+  Shader.cpp
   openGL_01.cpp
   正在生成代码...
+  glad.c
   openGL_01.vcxproj -> E:\program\cpp\openGL\Debug\openGL_01.exe

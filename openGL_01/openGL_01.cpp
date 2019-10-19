@@ -243,14 +243,19 @@ int main(void)
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
 	#pragma endregion
 	
 
 	#pragma region Init and Load Texture
-		unsigned int texture[2];
+		unsigned int container, face, box, box_specular;
 
-		texture[0] = loadImageToGUP("container.jpg", GL_RGB, GL_RGB);
-		texture[1] = loadImageToGUP("awesomeface.png", GL_RGBA, GL_RGBA);
+		container = loadImageToGUP("container.jpg", GL_RGB, GL_RGB);
+		face = loadImageToGUP("awesomeface.png", GL_RGBA, GL_RGBA);
+		box = loadImageToGUP("woodenBox.png", GL_RGBA, GL_RGBA);
+		box_specular = loadImageToGUP("woodenBox_specular.png", GL_RGBA, GL_RGBA);
+
 		
 		//// 通过使用glUniform1i设置每个采样器的方式告诉OpenGL每个着色器采样器属于哪个纹理单元
 		//objectShader.use();													//先使用shader才能改变uniform的值
@@ -293,9 +298,9 @@ int main(void)
 				objectShader->use();										//先使用shader才能改变uniform的值
 				// Set Material -> Textures
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture[0]);
+				glBindTexture(GL_TEXTURE_2D, container);
 				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, texture[1]);
+				glBindTexture(GL_TEXTURE_2D, face);
 				// Set Material -> Uniforms
 				glUniform1i(glGetUniformLocation(objectShader->ID, "texture0"), 0);
 				glUniform1i(glGetUniformLocation(objectShader->ID, "texture2"), 2);
@@ -347,9 +352,12 @@ int main(void)
 				// Set Material -> Shader Program
 				colorShader->use();										//先使用shader才能改变uniform的值
 				// Set Material -> Textures
-				//
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, box);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, box_specular);
 				// Set Material -> Uniforms
-				glUniform3f(glGetUniformLocation(colorShader->ID, "objectColor"), 1.0f, 0.5f, 0.31f);
+				glUniform3f(glGetUniformLocation(colorShader->ID, "objectColor"), 1.0f, 1.0f, 1.0f);
 				colorShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 				//glUniform3fv(glGetUniformLocation(colorShader.ID, "lightColor"), 1, &glm::vec3(1.0f, 1.0f, 1.0f)[1]);
 				colorShader->setVec3("lightPos", cubePositions[3]);
@@ -358,9 +366,10 @@ int main(void)
 				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-				ourMaterial->shader->setVec3("material.ambient", ourMaterial->ambient);
-				ourMaterial->shader->setVec3("material.diffuse", ourMaterial->diffuse); 
-				ourMaterial->shader->setVec3("material.specular", ourMaterial->specular);
+				//ourMaterial->shader->setVec3("material.ambient", ourMaterial->ambient);
+				//ourMaterial->shader->setVec3("material.diffuse", ourMaterial->diffuse); 
+				ourMaterial->shader->setInt("material.diffuse", 0);
+				ourMaterial->shader->setInt("material.specular", 1);
 				ourMaterial->shader->setFloat("material.shininess", ourMaterial->shininess);
 
 				// Set Model

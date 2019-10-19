@@ -69,5 +69,11 @@
     <Image Include="awesomeface.png">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="woodenBox.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="woodenBox_specular.png">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>
