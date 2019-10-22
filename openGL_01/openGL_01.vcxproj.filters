@@ -30,6 +30,9 @@
     <ClCompile Include="Material.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LightDirectional.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -41,14 +44,11 @@
     <ClInclude Include="Material.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LightDirectional.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Object.frag">
-      <Filter>源文件</Filter>
-    </None>
-    <None Include="Object.vert">
-      <Filter>源文件</Filter>
-    </None>
     <None Include="Colors.vert">
       <Filter>源文件</Filter>
     </None>
@@ -73,6 +73,9 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="woodenBox_specular.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="matrix.jpg">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

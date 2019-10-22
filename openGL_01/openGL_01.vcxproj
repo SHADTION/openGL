@@ -164,12 +164,14 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="LightDirectional.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="openGL_01.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="LightDirectional.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Shader.h" />
   </ItemGroup>
@@ -178,12 +180,11 @@
     <None Include="Colors.vert" />
     <None Include="Lights.frag" />
     <None Include="Lights.vert" />
-    <None Include="Object.frag" />
-    <None Include="Object.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="awesomeface.png" />
     <Image Include="container.jpg" />
+    <Image Include="matrix.jpg" />
     <Image Include="woodenBox.png" />
     <Image Include="woodenBox_specular.png" />
   </ItemGroup>

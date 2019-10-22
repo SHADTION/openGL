@@ -1,6 +1,7 @@
 ﻿#include "Shader.h"
 #include "Camera.h"
 #include "Material.h"
+#include "LightDirectional.h"
 
 
 #include <GLFW\glfw3.h>
@@ -91,6 +92,9 @@ glm::vec3 cubePositions[] = {
 //Camera ourCamera(glm::vec3(0, 0, 3.0f), 30.0f, 0.0f, glm::vec3(0, 1.0f, 0));
 //Camera* ourCamera = new Camera(glm::vec3(0, 0, 3.0f), glm::vec3(0, 1.0f, 0), glm::vec3(0, 0, -1.0f));
 Camera* ourCamera = new Camera(glm::vec3(0, 0, 3.0f), glm::vec3(0, 1.0f, 0), 0.0f, 0.0f);
+
+LightDirectional light = LightDirectional(glm::vec3(10.0f, 10.0f, -10.0f), glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
+	glm::vec3(1.0f, 1.0f, 1.0f));
 #pragma endregion
 
 
@@ -199,10 +203,6 @@ int main(void)
 
 	#pragma region Init Shader Program
 		// 新建Shader类，初始化并链接shader
-			//Shader objectShader("Object.vert", "Object.frag");
-			//Shader colorShader("Colors.vert", "Colors.frag");
-			//Shader lightShader("Lights.vert", "Lights.frag");
-			Shader* objectShader = new Shader("Object.vert", "Object.frag");
 			Shader* colorShader = new Shader("Colors.vert", "Colors.frag");
 			Shader* lightShader = new Shader("Lights.vert", "Lights.frag");
 	#pragma endregion
@@ -249,12 +249,13 @@ int main(void)
 	
 
 	#pragma region Init and Load Texture
-		unsigned int container, face, box, box_specular;
+		unsigned int container, face, box, box_specular, matrix;
 
 		container = loadImageToGUP("container.jpg", GL_RGB, GL_RGB);
 		face = loadImageToGUP("awesomeface.png", GL_RGBA, GL_RGBA);
 		box = loadImageToGUP("woodenBox.png", GL_RGBA, GL_RGBA);
 		box_specular = loadImageToGUP("woodenBox_specular.png", GL_RGBA, GL_RGBA);
+		matrix = loadImageToGUP("matrix.jpg", GL_RGB, GL_RGB);
 
 		
 		//// 通过使用glUniform1i设置每个采样器的方式告诉OpenGL每个着色器采样器属于哪个纹理单元
@@ -284,51 +285,22 @@ int main(void)
 		glClearColor(0, 0, 0, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//清除颜色缓冲，通过在glClear函数中指定DEPTH_BUFFER_BIT位来清除深度缓冲
 
-		#pragma region texture object
+		#pragma region light object
 				// Set Model matrix
 				model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(10.0f, 10.0f, -10.0f));
 				float angle = (float)glfwGetTime() * 20.0f;
 				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
 				// Set View and Projection Matrices here if you want.
 				view = ourCamera->GetFrontViewMatrix();
-		
-		
-				// Set Material -> Shader Program
-				objectShader->use();										//先使用shader才能改变uniform的值
-				// Set Material -> Textures
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, container);
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, face);
-				// Set Material -> Uniforms
-				glUniform1i(glGetUniformLocation(objectShader->ID, "texture0"), 0);
-				glUniform1i(glGetUniformLocation(objectShader->ID, "texture2"), 2);
-				glUniformMatrix4fv(glGetUniformLocation(objectShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-				glUniformMatrix4fv(glGetUniformLocation(objectShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(objectShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-		
-				// Set Model
-				glBindVertexArray(awesomeVAO);
-		
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-		#pragma endregion
-
-		#pragma region light object
-				// Set Model matrix
-				model = glm::mat4(1.0f);
-				model = glm::translate(model, cubePositions[3]);
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
-				// Set View and Projection Matrices here if you want.
-				//
 
 				// Set Material -> Shader Program
 				lightShader->use();										//先使用shader才能改变uniform的值
 				// Set Material -> Textures
 				//
 				// Set Material -> Uniforms
-				glUniform3f(glGetUniformLocation(lightShader->ID, "lightColor"), 1.0f, 1.0f, 1.0f);
+				glUniform3f(glGetUniformLocation(lightShader->ID, "lightColor"), light.color.x, light.color.y, light.color.z);
 				glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
 				glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -340,42 +312,48 @@ int main(void)
 		#pragma endregion
 
 		#pragma region color object
-				// Set Model matrix
-				model = glm::mat4(1.0f);
-				model = glm::translate(model, cubePositions[2]);
-				// Set View and Projection Matrices here if you want.
-				//
+				for (int i = 0; i < 10; i++) {
+					// Set Model matrix
+					model = glm::mat4(1.0f);
+					model = glm::translate(model, cubePositions[i]);
+					// Set View and Projection Matrices here if you want.
+					//
 
-				// mormal change 
-				glm::mat3 normalChange = glm::mat3(transpose(inverse(model)));
+					// mormal change 
+					glm::mat3 normalChange = glm::mat3(transpose(inverse(model)));
 
-				// Set Material -> Shader Program
-				colorShader->use();										//先使用shader才能改变uniform的值
-				// Set Material -> Textures
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, box);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, box_specular);
-				// Set Material -> Uniforms
-				glUniform3f(glGetUniformLocation(colorShader->ID, "objectColor"), 1.0f, 1.0f, 1.0f);
-				colorShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-				//glUniform3fv(glGetUniformLocation(colorShader.ID, "lightColor"), 1, &glm::vec3(1.0f, 1.0f, 1.0f)[1]);
-				colorShader->setVec3("lightPos", cubePositions[3]);
-				colorShader->setMat3("normalChange", normalChange);
-				colorShader->setVec3("viewPos", ourCamera->cameraPos);
-				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-				//ourMaterial->shader->setVec3("material.ambient", ourMaterial->ambient);
-				//ourMaterial->shader->setVec3("material.diffuse", ourMaterial->diffuse); 
-				ourMaterial->shader->setInt("material.diffuse", 0);
-				ourMaterial->shader->setInt("material.specular", 1);
-				ourMaterial->shader->setFloat("material.shininess", ourMaterial->shininess);
+					// Set Material -> Shader Program
+					colorShader->use();										//先使用shader才能改变uniform的值
+					// Set Material -> Textures
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, box);
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_2D, box_specular);
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_2D, matrix);
+					// Set Material -> Uniforms
+					glUniform3f(glGetUniformLocation(colorShader->ID, "objectColor"), 1.0f, 1.0f, 1.0f);
+					colorShader->setVec3("lightColor", light.color);
+					//glUniform3fv(glGetUniformLocation(colorShader.ID, "lightColor"), 1, &glm::vec3(1.0f, 1.0f, 1.0f)[1]);
+					//colorShader->setVec3("lightPos", ligth.position);
+					colorShader->setVec3("lightDir", light.direction);
+					colorShader->setMat3("normalChange", normalChange);
+					colorShader->setVec3("viewPos", ourCamera->cameraPos);
+					glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+					glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+					glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+					//ourMaterial->shader->setVec3("material.ambient", ourMaterial->ambient);
+					//ourMaterial->shader->setVec3("material.diffuse", ourMaterial->diffuse); 
+					ourMaterial->shader->setInt("material.diffuse", 0);
+					ourMaterial->shader->setInt("material.specular", 1);
+					ourMaterial->shader->setInt("material.emission", 2);
+					ourMaterial->shader->setFloat("material.shininess", ourMaterial->shininess);
 
-				// Set Model
-				glBindVertexArray(lightVAO);
+					// Set Model
+					glBindVertexArray(lightVAO);
 
-				glDrawArrays(GL_TRIANGLES, 0, 36);
+					glDrawArrays(GL_TRIANGLES, 0, 36);
+				}
 		#pragma endregion
 
 		
