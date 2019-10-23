@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "LightDirectional.h"
 #include "LightPoint.h"
+#include "LightSpot.h"
 
 
 #include <GLFW\glfw3.h>
@@ -94,10 +95,8 @@ glm::vec3 cubePositions[] = {
 //Camera* ourCamera = new Camera(glm::vec3(0, 0, 3.0f), glm::vec3(0, 1.0f, 0), glm::vec3(0, 0, -1.0f));
 Camera* ourCamera = new Camera(glm::vec3(0, 0, 3.0f), glm::vec3(0, 1.0f, 0), 0.0f, 0.0f);
 
-LightDirectional light = LightDirectional(glm::vec3(10.0f, 10.0f, -10.0f), glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
+LightSpot light = LightSpot(glm::vec3(0, 0, 2.0f), glm::vec3(0, 0, 0),
 	glm::vec3(1.0f, 1.0f, 1.0f));
-LightPoint lightPo = LightPoint(glm::vec3(0, 1.0f, -1.0f), glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
-	glm::vec3(10.0f, 10.0f, 10.0f));
 #pragma endregion
 
 
@@ -291,7 +290,7 @@ int main(void)
 		#pragma region light object
 				// Set Model matrix
 				model = glm::mat4(1.0f);
-				model = glm::translate(model, lightPo.position);
+				model = glm::translate(model, light.position);
 				float angle = (float)glfwGetTime() * 20.0f;
 				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
@@ -336,9 +335,9 @@ int main(void)
 					glBindTexture(GL_TEXTURE_2D, matrix);
 					// Set Material -> Uniforms
 					glUniform3f(glGetUniformLocation(colorShader->ID, "objectColor"), 1.0f, 1.0f, 1.0f);
-					colorShader->setVec3("lightColor", lightPo.color);
+					colorShader->setVec3("lightColor", light.color);
 					//glUniform3fv(glGetUniformLocation(colorShader.ID, "lightColor"), 1, &glm::vec3(1.0f, 1.0f, 1.0f)[1]);
-					colorShader->setVec3("lightPos", lightPo.position);
+					colorShader->setVec3("lightPos", light.position);
 					colorShader->setVec3("lightDirUniform", light.direction);
 					colorShader->setMat3("normalChange", normalChange);
 					colorShader->setVec3("viewPos", ourCamera->cameraPos);
@@ -347,9 +346,11 @@ int main(void)
 					glUniformMatrix4fv(glGetUniformLocation(colorShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 					//ourMaterial->shader->setVec3("material.ambient", ourMaterial->ambient);
 					//ourMaterial->shader->setVec3("material.diffuse", ourMaterial->diffuse); 
-					colorShader->setFloat("lightP.constant", lightPo.constant);
-					colorShader->setFloat("lightP.linear", lightPo.linear);
-					colorShader->setFloat("lightP.quadratic", lightPo.quadratic);
+					//colorShader->setFloat("lightP.constant", light.constant);
+					//colorShader->setFloat("lightP.linear", light.linear);
+					//colorShader->setFloat("lightP.quadratic", light.quadratic);
+					colorShader->setFloat("lightS.thetaIn", light.thetaIn);
+					colorShader->setFloat("lightS.thetaOut", light.thetaOut);
 					ourMaterial->shader->setInt("material.diffuse", 0);
 					ourMaterial->shader->setInt("material.specular", 1);
 					ourMaterial->shader->setInt("material.emission", 2);

@@ -18,8 +18,14 @@ struct LightPoint {
     float quadratic;
 };
 
+struct LightSpot{
+	float thetaIn;
+	float thetaOut;
+};
+
 uniform Material material;
 uniform LightPoint lightP;
+uniform LightSpot lightS;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -55,8 +61,22 @@ void main()
 	//float emissionStrength = 1.0;
 	//vec3 emission = vec3(texture(material.emission, TexCoord)) * emissionStrength;
 
+	// light spot 
+	float theta = dot(lightDir, normalize(lightDirUniform));
 
-	vec3 result = (ambient + (diffuse + specular) * attenuation) * objectColor;
+	float spotDate;
+	if(theta > lightS.thetaIn)
+	//光圈内
+		spotDate = 1.0f;
+	else if(theta > lightS.thetaOut)
+	//边缘
+		spotDate = (theta - lightS.thetaOut) / (lightS.thetaIn - lightS.thetaOut);
+	else
+	//外面
+		spotDate = 0;
+		
+	vec3 result = (ambient + (diffuse + specular) * spotDate) * objectColor;
+
 
 	//out fragcolor
     FragColor = vec4(result, 1.0);
