@@ -33,6 +33,9 @@
     <ClCompile Include="LightDirectional.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LightPoint.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -45,6 +48,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="LightDirectional.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LightPoint.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

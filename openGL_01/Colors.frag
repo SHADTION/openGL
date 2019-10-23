@@ -12,23 +12,34 @@ struct Material {
     float shininess;
 }; 
 
+struct LightPoint {
+	float constant;
+    float linear;
+    float quadratic;
+};
+
 uniform Material material;
+uniform LightPoint lightP;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
-uniform vec3 lightDir;
+uniform vec3 lightDirUniform;
 uniform vec3 viewPos;
 uniform vec3 objectColor;
 
 void main()
 {
+	// light point 
+	float dist = length(lightPos - FragPos);
+	float attenuation = 1.0 / (lightP.constant + lightP.linear * dist + lightP.quadratic * (dist * dist));
+
 	// ambient
-	float ambientStrength = 0.2;
+	float ambientStrength = 0.1;
     vec3 ambient = vec3(texture(material.diffuse, TexCoord)) * ambientStrength * lightColor;
   	
     // diffuse 
     vec3 norm = normalize(Normal);
-    //vec3 lightDir = normalize(lightPos - FragPos);
+    vec3 lightDir = normalize(lightPos - FragPos);
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = vec3(texture(material.diffuse, TexCoord)) * diff * lightColor;
 
@@ -45,7 +56,7 @@ void main()
 	//vec3 emission = vec3(texture(material.emission, TexCoord)) * emissionStrength;
 
 
-	vec3 result = (ambient + diffuse + specular) * objectColor;
+	vec3 result = (ambient + (diffuse + specular) * attenuation) * objectColor;
 
 	//out fragcolor
     FragColor = vec4(result, 1.0);
