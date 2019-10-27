@@ -7,7 +7,7 @@ LightPoint::LightPoint(glm::vec3 _position, glm::vec3 _angles, glm::vec3 _color)
 {
 	constant = 1.0f;
 	linear = 0.09f;
-	quadratic = 0.032f;
+	quadratic = 0.012f;
 }
 
 LightPoint::~LightPoint()

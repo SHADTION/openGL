@@ -11,6 +11,10 @@ public:
 	glm::vec3 direction;
 	glm::vec3 color;
 
+	float constant;
+	float linear;
+	float quadratic;
+
 	float thetaIn = glm::cos(glm::radians(30.0f));
 	float thetaOut = glm::cos(glm::radians(33.0f));
 
