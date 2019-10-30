@@ -91,27 +91,27 @@ glm::vec3 cubePositions[] = {
 // 新建一个Camera类
 Camera* ourCamera = new Camera(glm::vec3(0, 0, 3.0f), glm::vec3(0, 1.0f, 0), 0.0f, 0.0f);
 
-LightDirectional lightD = LightDirectional(glm::vec3(0, 0, 2.0f), 
+LightDirectional lightD(glm::vec3(0, 0, 2.0f), 
 	glm::vec3(glm::radians(-45.0f),glm::radians(-45.0f), 0),
 	glm::vec3(1.0f, 1.0f, 1.0f));
 
-LightPoint lightP0 = LightPoint(glm::vec3(3.0f, 0, -5.0f), 
+LightPoint lightP0(glm::vec3(3.0f, 0, -5.0f), 
 	glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
 	glm::vec3(0, 0, 1.0f));
 
-LightPoint lightP1 = LightPoint(glm::vec3(-3.0f, 4.0f, 0),
+LightPoint lightP1(glm::vec3(-3.0f, 4.0f, 0),
 	glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
 	glm::vec3(0, 1.0f, 0));
 
-LightPoint lightP2 = LightPoint(glm::vec3(3.0f, -4.0f, -3.0f),
+LightPoint lightP2(glm::vec3(3.0f, -4.0f, -3.0f),
 	glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
 	glm::vec3(1.0f, 0, 0));
 
-LightPoint lightP3 = LightPoint(glm::vec3(0, 0, -2.0f),
+LightPoint lightP3(glm::vec3(0, 0, -2.0f),
 	glm::vec3(glm::radians(45.0f), glm::radians(45.0f), 0),
 	glm::vec3(1.0f, 1.0f, 1.0f));
 
-LightSpot lightS = LightSpot(glm::vec3(0, 0, 1.5f),
+LightSpot lightS(glm::vec3(0, 0, 1.5f),
 	glm::vec3(glm::radians(0.0f), glm::radians(0.0f), 0),
 	glm::vec3(0.6f, 0.9f, 0.6f));
 #pragma endregion
