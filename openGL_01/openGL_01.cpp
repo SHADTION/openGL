@@ -5,19 +5,16 @@
 #include "LightPoint.h"
 #include "LightSpot.h"
 
-
 #include <GLFW\glfw3.h>
 #include <glad/glad.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#define STB_IMAGE_IMPLEMENTATION
+
 #include <stb/stb_image.h>
 
+#include "Model.h"
 
 #define QE ==
 
@@ -149,7 +146,6 @@ void mouse_callback(GLFWwindow* Window, double XPos, double YPos)
 	ourCamera->mouse_callback(XOffset, YOffset);
 }
 
-
 unsigned int loadImageToGUP(const char* ImageName, GLint InternalFormat, GLenum Format) {
 	// Texture
 	unsigned int texture;
@@ -177,6 +173,7 @@ unsigned int loadImageToGUP(const char* ImageName, GLint InternalFormat, GLenum 
 	stbi_image_free(tex_data);										//释放图像的内存是一个很好的习惯
 	return texture;
 }
+
 #pragma endregion
 
 int main(void)
@@ -205,10 +202,14 @@ int main(void)
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+
 	// 初始化 
 	stbi_set_flip_vertically_on_load(true);			//stb_image.h 颠倒Y轴
 	glEnable(GL_DEPTH_TEST);						//启用深度测试，需开启GL_DEPTH_TEST
-
+	glDepthFunc(GL_LESS);
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	// 确定视口
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -303,8 +304,8 @@ int main(void)
 		// Clear Screen
 		glClearColor(0, 0, 0, 1.0f);
 		//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		//清除颜色缓冲，通过在glClear函数中指定DEPTH_BUFFER_BIT位来清除深度缓冲
-
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);		//清除颜色缓冲，通过在glClear函数中指定DEPTH_BUFFER_BIT位来清除深度缓冲,清除模板缓冲
+/*
 #pragma region light object
 		// Set Model matrix
 		model = glm::mat4(1.0f);
@@ -330,14 +331,18 @@ int main(void)
 
 		//glDrawArrays(GL_TRIANGLES, 0, 36);
 #pragma endregion
-
+*/
 #pragma region color object
 		for (int i = 0; i < 10; i++) {
+			//init stencil buffer
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+
 			// Set Model matrix
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
 			// Set View and Projection Matrices here if you want.
-			//
+			view = ourCamera->GetFrontViewMatrix();
 
 			// mormal change 
 			glm::mat3 normalChange = glm::mat3(transpose(inverse(model)));
@@ -417,9 +422,39 @@ int main(void)
 		}
 #pragma endregion
 
+#pragma region object outlining
+		for (int i = 0; i < 10; i++) {
+			//init stencil buffer
+			glStencilFunc(GL_NOTEQUAL, 1 ,0xFF);
+			glStencilMask(0x00);
+			glDisable(GL_DEPTH_TEST);
+
+			// Set Model matrix
+			float scale = 1.1;
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			model = glm::scale(model, glm::vec3(scale, scale, scale));
+			// Set View and Projection Matrices here if you want.
+			//view = ourCamera->GetFrontViewMatrix();
+
+			lightShader->use();
+			
+			lightShader->setVec3("lightColor", glm::vec3(0.04, 0.28, 0.26));
+			glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(lightShader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+			// Set Model
+			glBindVertexArray(lightVAO);
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+#pragma endregion
 
 		//glBindVertexArray(lightVAO);
 		glBindVertexArray(0);
+		glStencilMask(0xFF);
+		glEnable(GL_DEPTH_TEST);
 
 		//监测事件，交换缓冲
 		glfwSwapBuffers(window_1);

@@ -1,2 +1,3 @@
-﻿  Mesh.cpp
+﻿  openGL_01.cpp
+E:\program\cpp\openGL\openGL_01\openGL_01.cpp(432,21): warning C4305: “初始化”: 从“double”到“float”截断
   openGL_01.vcxproj -> E:\program\cpp\openGL\Debug\openGL_01.exe

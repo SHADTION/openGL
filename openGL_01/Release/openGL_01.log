@@ -1,0 +1,18 @@
+﻿  Camera.cpp
+  LightDirectional.cpp
+E:\program\cpp\openGL\openGL_01\Camera.h(3,10): fatal error C1083: 无法打开包括文件: “glm/glm.hpp”: No such file or directory
+  LightPoint.cpp
+E:\program\cpp\openGL\openGL_01\LightDirectional.h(3,10): fatal error C1083: 无法打开包括文件: “glm/glm.hpp”: No such file or directory
+  LightSpot.cpp
+E:\program\cpp\openGL\openGL_01\LightPoint.h(3,10): fatal error C1083: 无法打开包括文件: “glm/glm.hpp”: No such file or directory
+  Material.cpp
+E:\program\cpp\openGL\openGL_01\LightSpot.h(3,10): fatal error C1083: 无法打开包括文件: “glm/glm.hpp”: No such file or directory
+  Mesh.cpp
+E:\program\cpp\openGL\openGL_01\Shader.h(5,10): fatal error C1083: 无法打开包括文件: “glad/glad.h”: No such file or directory
+  Model.cpp
+E:\program\cpp\openGL\openGL_01\Mesh.h(4,10): fatal error C1083: 无法打开包括文件: “glad/glad.h”: No such file or directory
+  openGL_01.cpp
+E:\program\cpp\openGL\openGL_01\Model.h(4,10): fatal error C1083: 无法打开包括文件: “glad/glad.h”: No such file or directory
+  Shader.cpp
+E:\program\cpp\openGL\openGL_01\Shader.h(5,10): fatal error C1083: 无法打开包括文件: “glad/glad.h”: No such file or directory
+E:\program\cpp\openGL\openGL_01\Shader.h(5,10): fatal error C1083: 无法打开包括文件: “glad/glad.h”: No such file or directory
